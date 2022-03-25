@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import numpy as np
@@ -20,15 +21,15 @@ parse_dates = [
 ]
 
 
-def create_db(value: int):
-    if value == 1:
+def create_db():
+    if os.path.isfile('logistic.db'):
         return 0
-
     Path("./logistic.db").touch()
     con = sqlite3.connect("logistic.db")
 
     data = pd.read_csv('logistic_case/logistics-case-v3.csv', parse_dates=parse_dates)
     data.to_sql("logistic", con, if_exists='fail', index=False)
+    con.close()
 
 
 querry1 = """    select
@@ -52,7 +53,9 @@ querry1 = """    select
 
 
 if __name__ == '__main__':
-    create_db(1)
+    create_db()
+    con = sqlite3.connect("logistic.db")
+
     data = pd.read_csv('logistic_case/logistics-case-v3.csv', parse_dates=parse_dates)
     con = sqlite3.connect("logistic.db")
     cur = con.cursor()
@@ -62,11 +65,7 @@ if __name__ == '__main__':
     df_onDay = pd.read_csv('sql/em_dia.csv')
     df_onDay = df_onDay.sort_values(by='count(id)')
 
-    print(df_onDay.info())
-
     df_plot = pd.DataFrame
-
-
 
     q1 = """    select
         delivery_addresses_to_state as 'state',
@@ -80,17 +79,16 @@ if __name__ == '__main__':
 	ORDER by count(id)
 		 desc"""
 
-
-    df_ = pd.read_sql_query(q1,con)
+    df_ = pd.read_sql_query(q1, con)
 
     df = pd.DataFrame({
         'state': df_['state'],
         'lateness': df_['lateness'],
-        'delivery_time':df_['delivery_time']
+        'delivery_time': df_['delivery_time']
 
     })
 
-    ax = df.plot.bar(x='state',y =['lateness','delivery_time'], rot=0, figsize=(20, 15), stacked=False,
+    ax = df.plot.bar(x='state', y=['lateness', 'delivery_time'], rot=0, figsize=(20, 15), stacked=False,
                      title="Deliveries: average per State")
     ax.set_xlabel("States")
     ax.set_ylabel("Days")
@@ -188,7 +186,6 @@ if __name__ == '__main__':
                      title="Comparison: good deliveries x count per state",
                      subplots=True)
 
-
     #
     # By now, we can see that the avg  delivery time is higher than the avg on time delivery; when looking at this data, we can find in wich steps
     # are taking  more days.  This way, we can find what is taking more time.
@@ -200,20 +197,13 @@ if __name__ == '__main__':
 
         'Late_delivers': df_late['count(id)'],
         'Late_delivers(days)': df_late['tempo de entrega'],
-        'late_percenagt': df_late['count(id)'] / df_late['count(id)'].sum()*100,
+        'late_percenagt': df_late['count(id)'] / df_late['count(id)'].sum() * 100,
 
         'onDay_delivers': df_onDay['count(id)'],
         'onDays_delivers(days)': df_onDay['tempo de entrega'],
-        'onDay_percent': df_onDay['count(id)'] / df_onDay['count(id)'].sum()*100,
+        'onDay_percent': df_onDay['count(id)'] / df_onDay['count(id)'].sum() * 100,
 
     })
-
-    df = df.sort_values(by='late_percent', ascending=False)
-    # ax = df.plot.pie(x='States',y='late_percent', figsize=(20, 15),
-    #                    title="Comparison: good deliveries x count per state",
-    #                    subplots=True)
-
-    print(df)
 
     plt.show()
     con.close()
