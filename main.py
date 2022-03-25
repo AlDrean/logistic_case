@@ -1,6 +1,3 @@
-# @TODO: mudar o nome do csv importado para o nome original
-# @TODO: Mais gráficos
-
 from datetime import datetime
 
 import numpy as np
@@ -31,7 +28,7 @@ def create_db(value: int):
     con = sqlite3.connect("logistic.db")
 
     data = pd.read_csv('logistic_case/logistics-case-v3.csv', parse_dates=parse_dates)
-    data.to_sql("logistic", con, if_exists='append', index=False)
+    data.to_sql("logistic", con, if_exists='fail', index=False)
 
 
 querry1 = """    select
@@ -55,7 +52,7 @@ querry1 = """    select
 
 
 if __name__ == '__main__':
-    create_db(0)
+    create_db(1)
     data = pd.read_csv('logistic_case/logistics-case-v3.csv', parse_dates=parse_dates)
     con = sqlite3.connect("logistic.db")
     cur = con.cursor()
@@ -68,6 +65,38 @@ if __name__ == '__main__':
     print(df_onDay.info())
 
     df_plot = pd.DataFrame
+
+
+
+    q1 = """    select
+        delivery_addresses_to_state as 'state',
+		avg((julianday(delivery_estimate_date) - julianday(created_at))) as 'delivery__',
+		avg((julianday(delivered_at) - julianday(created_at))) as 'delivery_time',
+		avg((julianday(delivered_at) - julianday(delivery_estimate_date))) as 'lateness',
+
+        count(id)
+    from logistic
+  	GROUP by logistic.delivery_addresses_to_state
+	ORDER by count(id)
+		 desc"""
+
+
+    df_ = pd.read_sql_query(q1,con)
+
+    df = pd.DataFrame({
+        'state': df_['state'],
+        'lateness': df_['lateness'],
+        'delivery_time':df_['delivery_time']
+
+    })
+
+    ax = df.plot.bar(x='state',y =['lateness','delivery_time'], rot=0, figsize=(20, 15), stacked=False,
+                     title="Deliveries: average per State")
+    ax.set_xlabel("States")
+    ax.set_ylabel("Days")
+    fig = ax.get_figure()
+    fig.savefig('graph/avg_delivery_time.png')
+    df.to_csv('graph/avg_delivery_time.csv')
 
     #
     # Fist, we need to find anomalies. As its a  delivery system, we should star by looking  at thhe average times between
@@ -86,6 +115,7 @@ if __name__ == '__main__':
     ax.set_ylabel("Days")
     fig = ax.get_figure()
     fig.savefig('graph/comparison_late_on_day.png')
+    df.to_csv('graph/comparison_late_on_day.csv')
 
     df = pd.DataFrame({
         'States': df_late['estado'],
@@ -149,7 +179,6 @@ if __name__ == '__main__':
 
     df = pd.DataFrame({
         'States': df_onDay['estado'],
-
         'Early delivery(days)': df_onDay['atraso'],
         'number deliveries': df_onDay['count(id)'],
     })
@@ -158,6 +187,7 @@ if __name__ == '__main__':
     ax = df.plot.bar(x='States', rot=0, figsize=(20, 15), stacked=False, color=[GOODCOLOR, GOODCOLOR],
                      title="Comparison: good deliveries x count per state",
                      subplots=True)
+
 
     #
     # By now, we can see that the avg  delivery time is higher than the avg on time delivery; when looking at this data, we can find in wich steps
@@ -170,7 +200,7 @@ if __name__ == '__main__':
 
         'Late_delivers': df_late['count(id)'],
         'Late_delivers(days)': df_late['tempo de entrega'],
-        'late_percent': df_late['count(id)'] / df_late['count(id)'].sum()*100,
+        'late_percenagt': df_late['count(id)'] / df_late['count(id)'].sum()*100,
 
         'onDay_delivers': df_onDay['count(id)'],
         'onDays_delivers(days)': df_onDay['tempo de entrega'],
