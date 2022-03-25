@@ -1,0 +1,56 @@
+quando se trata de atrasos, temos
+
+@Média geral
+    Na média geral, temos
+    select
+        avg((julianday(delivered_at) - julianday(delivery_estimate_date))) as 'adiantamento',
+        count(id)
+    from logistic
+
+    média/count id
+    -0.932662071752246	757460
+
+@Média Em dia
+    select
+        avg((julianday(delivered_at) - julianday(delivery_estimate_date))) as 'em dia',
+        count(id)
+    from logistic
+    WHERE (julianday(delivered_at) - julianday(delivery_estimate_date) < 1) AND (julianday(delivered_at) - julianday(delivery_estimate_date) >= 0)
+
+    em dia
+    0.607181549854493	78056
+
+
+@Média Adiantado
+    select
+        avg((julianday(delivered_at) - julianday(delivery_estimate_date))) as 'adiantado',
+        count(id)
+    from logistic
+    WHERE (julianday(delivered_at) - julianday(delivery_estimate_date) <= 1)
+
+    adiantado
+    -3.06230320751369	574750
+
+@média atrasado
+    select
+        avg((julianday(delivered_at) - julianday(delivery_estimate_date))) as 'atrasado',
+        count(id)
+    from logistic
+    WHERE ((julianday(delivered_at) - julianday(delivery_estimate_date) > 0))
+
+
+    atrasado
+    4.43171368252594	250580
+
+ou seja, temos
+
+    em dia
+    0.607181549854493	78056
+
+    adiantado
+    -3.06230320751369	574750
+
+    atrasado
+    4.43171368252594	250580
+
+total: 757460
