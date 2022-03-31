@@ -25,7 +25,7 @@ the technical assessment in the end, enjoy!
 1. Explain the money flow and the information flow in the acquirer market and the role of the main players.
 2. Explain the difference between acquirer, sub-acquirer and payment gateway and how the flow explained in question 1 changes for these players.
 3. Talk about how the supply chain fits into the ecosystem of means of payments.
-4. Based on the above points, please explain, how the agile delivery of the card machine would benefit everyone involved.
+4. # Based on the above points, please explain, how the agile delivery of the card machine would benefit everyone involved.
 
 ### 3.2 - Get your hands dirty
 

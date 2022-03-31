@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     #
     # Fist, we need to find anomalies. As its a  delivery system, we should star by looking  at thhe average times between
-    # the checkpoints and thedelivery, and copare it to the stimated  date.  We can split the data between brazil's states and see what do we got
+    # the checkpoints and the delivery, and copare it to the stimated  date.  We can split the data between brazil's states and see what do we got
     #
 
     df = pd.DataFrame({
